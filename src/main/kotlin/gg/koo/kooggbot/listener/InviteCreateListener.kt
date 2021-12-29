@@ -1,14 +1,14 @@
 package gg.koo.kooggbot.listener
 
-import discord4j.common.util.Snowflake
-import discord4j.core.`object`.PermissionOverwrite
 import discord4j.core.event.domain.Event
 import discord4j.core.event.domain.InviteCreateEvent
-import discord4j.core.spec.VoiceChannelCreateSpec
-import discord4j.rest.util.Permission
-import discord4j.rest.util.PermissionSet
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactor.asFlux
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 
 @Component
 class InviteCreateListener: Listener<InviteCreateEvent> {
@@ -19,6 +19,14 @@ class InviteCreateListener: Listener<InviteCreateEvent> {
 
     override fun execute(event: Event): Mono<Any> {
         val e = event as InviteCreateEvent
+
+        (1..10).asFlow().flowOn(Dispatchers.IO)
+            .asFlux()
+            .subscribe {
+                println(it)
+            }
+//        e.guild.block()!!.invites.asFlow()
+//            .collect()
 //
 //        e.guild.block()
 //            ?.createVoiceChannel(

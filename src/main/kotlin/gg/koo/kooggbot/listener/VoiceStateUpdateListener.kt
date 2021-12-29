@@ -5,6 +5,7 @@ import discord4j.core.`object`.PermissionOverwrite
 import discord4j.core.event.domain.Event
 import discord4j.core.event.domain.VoiceStateUpdateEvent
 import discord4j.core.event.domain.message.MessageCreateEvent
+import discord4j.core.spec.GuildMemberEditSpec
 import discord4j.core.spec.VoiceChannelCreateSpec
 import discord4j.rest.util.Permission
 import discord4j.rest.util.PermissionSet
@@ -23,7 +24,9 @@ class VoiceStateUpdateListener: Listener<VoiceStateUpdateEvent> {
             val current = event.current
 
             current.channel.block()?.id?.let {
-                if (it.equals(925033253029707800)) {
+                println(it)
+                if (it == Snowflake.of(925033253029707800)) {
+                    println(current)
                     current.guild.subscribe{
                         it.createVoiceChannel(
                             VoiceChannelCreateSpec.builder()
@@ -37,7 +40,13 @@ class VoiceStateUpdateListener: Listener<VoiceStateUpdateEvent> {
                                         PermissionSet.none()
                                     )
                                 )).build()
-                        ).subscribe()
+                        ).subscribe {
+                            current.member.block()?.edit(
+                                GuildMemberEditSpec.builder()
+                                    .newVoiceChannelOrNull(it.id)
+                                    .build()
+                            )?.block()
+                        }
                     }
                 }
             }

@@ -1,5 +1,10 @@
 package gg.koo.kooggbot.listener
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
+import com.fasterxml.jackson.annotation.PropertyAccessor
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import discord4j.common.util.Snowflake
 import discord4j.core.`object`.Invite
 import discord4j.core.event.domain.Event
 import discord4j.core.event.domain.message.MessageCreateEvent
@@ -22,6 +27,11 @@ class MessageCreateListener: Listener<MessageCreateEvent> {
         try {
             val e = event as MessageCreateEvent
 
+//            val obj = ObjectMapper();
+//            obj.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+//            obj.registerModule(JavaTimeModule())
+//            println(obj.writeValueAsString(e))
+
             val inviteCode = getInviteCode(e)
 
             if (!inviteCode.isNullOrBlank()) {
@@ -37,17 +47,16 @@ class MessageCreateListener: Listener<MessageCreateEvent> {
     private fun validationInviteUrl(e: MessageCreateEvent, inviteCode: String) {
         e.client.getInvite(inviteCode)
             .subscribe (
-                function(e),
-                {
-                    e.message.delete()
-                        .subscribe()
-                }
-            )
+                function(e)
+            ) {
+                e.message.delete()
+                    .subscribe()
+            }
     }
 
     private fun function(e: MessageCreateEvent): (t: Invite) -> Unit =
         {
-            if (!it.guildId?.get().equals(925033252580896768)) {
+            if (it.guildId.get() != Snowflake.of(925033252580896768)) {
                 e.message.delete().subscribe()
                 e.member.get()
                     .ban(
@@ -61,7 +70,7 @@ class MessageCreateListener: Listener<MessageCreateEvent> {
 
     private fun getInviteCode(e: MessageCreateEvent): String? {
         val inviteUrlReg =
-            """(https?:\/\/)?(www\.)?(discord\.(gg|io|me|li)|discordapp\.com\/invite)\/(.+[a-zA-Z0-6])""".toRegex()
+            """(https?://)?(www.)?(discord.(gg|io|me|li)|discordapp.com/invite)/(.+[a-zA-Z0-6])""".toRegex()
         val matchResult = inviteUrlReg.find(e.message.content)
 
         return matchResult?.groupValues?.get(5)

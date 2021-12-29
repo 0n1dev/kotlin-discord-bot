@@ -1,6 +1,8 @@
 package gg.koo.kooggbot.listener
 
 import discord4j.core.event.domain.Event
+import discord4j.core.event.domain.lifecycle.ReadyEvent
+import discord4j.core.event.domain.message.MessageCreateEvent
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
@@ -12,8 +14,11 @@ class EventListener: Listener<Event> {
     }
 
     override fun execute(event: Event): Mono<Any> {
-        println(event.javaClass)
-
+        when (event) {
+            is ReadyEvent -> println("ㅇㅇㅇ")
+            is MessageCreateEvent -> println("Message")
+            else -> println("모름")
+        }
         return Mono.empty()
     }
 }

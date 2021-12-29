@@ -23,6 +23,7 @@ class BotConfiguration(
 
     @Bean
     fun gatewayDiscordClient(): GatewayDiscordClient? {
+        println(token)
 //        Hooks.onErrorDropped {
 //            it
 //        }
