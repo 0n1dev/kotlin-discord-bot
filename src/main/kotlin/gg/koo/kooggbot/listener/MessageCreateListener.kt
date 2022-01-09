@@ -10,6 +10,10 @@ import discord4j.core.event.domain.Event
 import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.core.spec.BanQuerySpec
 import discord4j.rest.http.client.ClientException
+import gg.koo.kooggbot.utils.isValid
+import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Hooks
@@ -44,19 +48,20 @@ class MessageCreateListener: Listener<MessageCreateEvent> {
         return Mono.empty()
     }
 
-    private fun validationInviteUrl(e: MessageCreateEvent, inviteCode: String) {
+    private suspend fun validationInviteUrl(e: MessageCreateEvent, inviteCode: String) {
         e.client.getInvite(inviteCode)
-            .subscribe (
-                function(e)
-            ) {
-                e.message.delete()
-                    .subscribe()
-            }
+            .await
+//            .subscribe (
+//                function(e)
+//            ) {
+//                e.message.delete()
+//                    .subscribe()
+//            }
     }
 
     private fun function(e: MessageCreateEvent): (t: Invite) -> Unit =
         {
-            if (it.guildId.get() != Snowflake.of(925033252580896768)) {
+            if (it.isValid()) {
                 e.message.delete().subscribe()
                 e.member.get()
                     .ban(

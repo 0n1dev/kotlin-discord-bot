@@ -2,13 +2,12 @@ package gg.koo.kooggbot.listener
 
 import discord4j.core.event.domain.Event
 import discord4j.core.event.domain.InviteCreateEvent
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.reactor.asFlux
 import org.springframework.stereotype.Component
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
+
 
 @Component
 class InviteCreateListener: Listener<InviteCreateEvent> {
@@ -20,11 +19,32 @@ class InviteCreateListener: Listener<InviteCreateEvent> {
     override fun execute(event: Event): Mono<Any> {
         val e = event as InviteCreateEvent
 
-        (1..10).asFlow().flowOn(Dispatchers.IO)
-            .asFlux()
-            .subscribe {
+        (1..10).asFlow().asFlux()
+            .doOnNext {
                 println(it)
             }
+            .log()
+            .subscribe(
+                {
+                    println(it)
+                },
+                {
+                    println(it.message)
+                },
+                {
+                    println("Complete")
+                })
+
+        val ints = Flux.range(1, 4) // (1)
+            .map { i: Int ->  // (2)
+                if (i <= 3) return@map i // (3)
+                throw RuntimeException("Got to 4") // (4)
+            }
+        ints.subscribe(
+            { i: Int? -> println(i) }
+        )  // (5)
+        { error: Throwable -> System.err.println("Error: $error") }
+
 //        e.guild.block()!!.invites.asFlow()
 //            .collect()
 //
